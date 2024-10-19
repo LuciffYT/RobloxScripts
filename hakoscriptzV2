@@ -1,0 +1,1 @@
+game:GetService("StarterGui"):SetCore("SendNotification",{Title = "Hey Skid!",Text = "your roblox account is hacked!",Duration = 5})

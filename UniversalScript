@@ -1,0 +1,266 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "DevAras`s Super Hub",
+   LoadingTitle = "Made By DevAras",
+   LoadingSubtitle = "Best Hub Ever",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "DevAras`s Super Hub | Key System",
+      Subtitle = "-just some keys-",
+      Note = "youtube.com/@DEV_Aras",
+      FileName = "Some Keys", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = false, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"https://pastebin.com/raw/qtCG2nsL"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local MainTab = Window:CreateTab("🏠Home", nil) -- Title, Image
+local Section = MainTab:CreateSection("Main")
+
+Rayfield:Notify({
+   Title = "Welcome,",
+   Content = "Enjoy Using Our Super GUI",
+   Duration = 5,
+   Image = nil,
+   Actions = { -- Notification Buttons
+
+      Ignore = { -- Duplicate this table (or remove it) to add and remove buttons to the notification.
+         Name = "Okay!",
+         Callback = function()
+            print("The user tapped Okay!")
+         end
+      },
+
+},
+})
+
+local Button = MainTab:CreateButton({
+   Name = "Inf Jump",
+   Callback = function()
+   local UserInputService = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
+local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+
+UserInputService.JumpRequest:Connect(function()
+    if humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+   end,
+})
+
+local Slider = MainTab:CreateSlider({
+   Name = "Walkspeed",
+   Range = {0, 100},
+   Increment = 16,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "walk", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+   end,
+})
+
+local Slider = MainTab:CreateSlider({
+   Name = "Jump Power",
+   Range = {0, 300},
+   Increment = 50,
+   Suffix = "Power",
+   CurrentValue = 50,
+   Flag = "jump", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = (Value)
+
+   end,
+})
+
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local flying = false
+local flySpeed = 50 -- Varsayılan uçma hızı
+
+-- Uçma fonksiyonu
+local function fly()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000) -- Yeterli kuvvet
+    bodyVelocity.Parent = humanoidRootPart
+
+    while flying do
+        wait()
+        -- Uçma hareketi
+        local moveDirection = Vector3.new()
+
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + workspace.CurrentCamera.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection - workspace.CurrentCamera.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection - workspace.CurrentCamera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + workspace.CurrentCamera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X * flySpeed, flySpeed, moveDirection.Z * flySpeed) -- Yukarı hareket
+        elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X * flySpeed, -flySpeed, moveDirection.Z * flySpeed) -- Aşağı hareket
+        else
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X * flySpeed, 0, moveDirection.Z * flySpeed) -- Yatay hareket
+        end
+    end
+
+    bodyVelocity:Destroy()
+end
+
+-- Rayfield menüsündeki buton
+local Button = MainTab:CreateButton({ 
+    Name = "Fly",
+    Callback = function()
+        flying = not flying -- Uçma durumunu değiştir
+        if flying then
+            fly() -- Uçmayı başlat
+        end
+    end,
+})
+
+-- Uçma hızını kontrol etmek için Slider oluşturma
+local Slider = MainTab:CreateSlider({
+    Name = "Fly Speed",
+    Range = {25, 1000}, -- Minimum ve maksimum değerler
+    Increment = 5, -- Artış miktarı
+    Suffix = "flyspeed", -- Arayüze eklenecek birim
+    CurrentValue = flySpeed, -- Başlangıç değeri
+    Callback = function(value)
+        flySpeed = value -- Slider'dan alınan değeri flySpeed'e ata
+    end,
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- NoClip durumu
+local noClip = false
+
+-- NoClip fonksiyonu
+local function toggleNoClip()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+    if noClip then
+        -- NoClip'i kapat
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    else
+        -- NoClip'i aç
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+    noClip = not noClip -- Durumu değiştir
+end
+
+-- Rayfield menüsündeki buton
+local Button = MainTab:CreateButton({ 
+    Name = "NoClip",
+    Callback = function()
+        toggleNoClip() -- NoClip fonksiyonunu çağır
+    end,
+})
+
+
+
+local SecondTab = Window:CreateTab("💀Visuals", nil) -- Title, Image
+local Section = SecondTab:CreateSection("Main")
+
+local Button = SecondTab:CreateButton({
+   Name = "Highlight ESP",
+   Callback = function()
+local Players = game:GetService("Players")
+
+-- ESP Fonksiyonu
+local function addESP(player)
+    local function onCharacterAdded(character)
+        -- Highlight nesnesini oluştur
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = character
+        highlight.FillColor = Color3.new(1, 1, 1) -- Beyaz renk
+        highlight.OutlineColor = Color3.new(1, 1, 1) -- Beyaz outline
+        highlight.FillTransparency = 1 -- Sadece outline göster
+        highlight.Parent = character
+    end
+    
+    -- Karakter varsa hemen ekle, yoksa karakter geldiğinde ekle
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+    player.CharacterAdded:Connect(onCharacterAdded)
+end
+
+-- Tüm oyuncular için ESP ekle
+for _, player in pairs(Players:GetPlayers()) do
+    addESP(player)
+end
+
+-- Yeni katılan oyuncular için ESP ekle
+Players.PlayerAdded:Connect(addESP)
+
+   end,
+})
+
+local ThirdTab = Window:CreateTab("🤍Scripts", nil) -- Title, Image
+local Section = ThirdTab:CreateSection("Universal")
+
+local Button = ThirdTab:CreateButton({
+   Name = "InfYield",
+   Callback = function()
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+   end,
+})
+
+local Button = ThirdTab:CreateButton({
+   Name = "Owl Hub",
+   Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/CriShoux/OwlHub/master/OwlHub.txt"))();
+   end,
+})
+
+local Button = ThirdTab:CreateButton({
+   Name = "Fling Script",
+   Callback = function()
+   loadstring(game:HttpGet(('https://raw.githubusercontent.com/0Ben1/fe/main/obf_5wpM7bBcOPspmX7lQ3m75SrYNWqxZ858ai3tJdEAId6jSI05IOUB224FQ0VSAswH.lua.txt'),true))()
+   end,
+})
+
+local Section = ThirdTab:CreateSection("MM2")
+
+local Button = ThirdTab:CreateButton({
+   Name = "MM2 Esp",
+   Callback = function()
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/Ihaveash0rtnamefordiscord/Releases/main/MurderMystery2HighlightESP"))(' Watermelon ?')
+   end,
+})
